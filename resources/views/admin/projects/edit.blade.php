@@ -6,6 +6,15 @@
             <i class="fa-solid fa-arrow-left fa-sm"></i>
         </a>
     </div>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <h2 class="fs-4 text-secondary my-4">Edit Project</h2>
     <form action="{{ route('admin.projects.update', ['project' => $project->slug]) }}" method="POST"
         enctype="multipart/form-data">
@@ -32,6 +41,22 @@
             @else
                 <small>Image not found</small>
             @endif
+        </div>
+        <div class="mb-3">
+            @foreach ($technologies as $technology)
+                <div class="form-check">
+                    @if ($errors->any())
+                        <input class="form-check-input" @checked(in_array($technology->id, old('technologies', []))) name="technologies[]" type="checkbox"
+                            value="{{ $technology->id }}" id="technology-{{ $technology->id }}">
+                    @else
+                        <input class="form-check-input" @checked($project->technologies->contains($technology)) name="technologies[]" type="checkbox"
+                            value="{{ $technology->id }}" id="technology-{{ $technology->id }}">
+                    @endif
+                    <label class="form-check-label" for="technology-{{ $technology->id }}">
+                        {{ $technology->name }}
+                    </label>
+                </div>
+            @endforeach
         </div>
         <div class="form-floating mb-3">
             <input type="text" class="form-control @error('client_name') is-invalid @enderror" id="floatingClientName"

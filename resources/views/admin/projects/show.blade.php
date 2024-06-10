@@ -20,6 +20,15 @@
                 {{ $project->client_name ? $project->client_name : 'Empty' }}</p>
             <p class="card-text"><strong>Type:</strong>
                 {{ $project->type ? $project->type->name : 'Not found' }}</p>
+            <p class="card-text"><strong>Technologies:</strong>
+                @if (count($project->technologies) > 0)
+                    @foreach ($project->technologies as $technology)
+                        {{ $technology->name }}
+                    @endforeach
+                @else
+                    Not found
+                @endif
+            </p>
             <p class="card-text"><strong>Created at:</strong> {{ $project->created_at }}</p>
             <p class="card-text"><strong>Updated at:</strong> {{ $project->updated_at }}</p>
             <p class="card-text">{{ $project->summary }}</p>

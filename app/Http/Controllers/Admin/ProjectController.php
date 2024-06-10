@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\Technology;
 use App\Models\Type;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -34,8 +35,10 @@ class ProjectController extends Controller
     public function create()
     {
         $types = Type::all();
+        $technologies = Technology::all();
         $data = [
-            'types' => $types
+            'types' => $types,
+            'technologies' => $technologies
         ];
         return view('admin.projects.create', $data);
     }
@@ -55,6 +58,7 @@ class ProjectController extends Controller
                 'image' => 'nullable|image|max:512',
                 'client_name' => 'nullable|min:5|max:200',
                 'summary' => 'nullable|min:10',
+                'technologies' => 'exists:technologies,id'
             ]
         );
         $formData = $request->all();
@@ -66,6 +70,9 @@ class ProjectController extends Controller
         $newProject = new Project();
         $newProject->fill($formData);
         $newProject->save();
+        if ($request->has('technologies')) {
+            $newProject->technologies()->attach($formData['technologies']);
+        }
         return redirect()->route('admin.projects.show', ['project' => $newProject->slug])->with('message', $newProject->name . ' successfully created.');
     }
 
@@ -92,9 +99,11 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         $types = Type::all();
+        $technologies = Technology::all();
         $data = [
             'project' => $project,
-            'types' => $types
+            'types' => $types,
+            'technologies' => $technologies
         ];
         return view('admin.projects.edit', $data);
     }
@@ -119,6 +128,7 @@ class ProjectController extends Controller
                 'image' => 'nullable|image|max:512',
                 'client_name' => 'nullable|min:5|max:200',
                 'summary' => 'nullable|min:10',
+                'technologies' => 'exists:technologies,id'
             ]
         );
         $formData = $request->all();
@@ -132,6 +142,11 @@ class ProjectController extends Controller
         }
         $project->update($formData);
         session()->flash('message', $project->name . ' successfully updated.');
+        if ($request->has('technologies')) {
+            $project->technologies()->sync($formData['technologies']);
+        } else {
+            $project->technologies()->sync([]);
+        }
         return redirect()->route('admin.projects.show', ['project' => $project->slug])->with('message', $project->name . ' successfully updated.');
     }
 
